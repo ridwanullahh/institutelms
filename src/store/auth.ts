@@ -47,8 +47,8 @@ export const useAuthStore = create<AuthState>()(
               id: '1',
               uid: 'demo-student-1',
               email: 'student@demo.com',
-              firstName: 'John',
-              lastName: 'Doe',
+              firstName: 'Muslim',
+              lastName: 'Muslim',
               role: 'student',
               preferences: {
                 theme: 'light',
