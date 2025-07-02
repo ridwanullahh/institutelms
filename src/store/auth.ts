@@ -19,13 +19,15 @@ interface AuthState {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   resetPassword: (email: string, otp: string, newPassword: string) => Promise<void>;
+  initializeCollections: () => Promise<void>;
 }
 
-// Initialize SDK with your GitHub repository details
+// Initialize SDK with environment variables
 const sdk = new UniversalSDK({
-  owner: 'your-github-username', // Replace with your GitHub username
-  repo: 'ai-institution-db', // Replace with your repository name
-  token: 'your-github-token', // Replace with your GitHub personal access token
+  owner: import.meta.env.VITE_GITHUB_OWNER || 'your-github-username',
+  repo: import.meta.env.VITE_GITHUB_REPO || 'ai-institution-db',
+  token: import.meta.env.VITE_GITHUB_TOKEN || 'your-github-token',
+  branch: import.meta.env.VITE_GITHUB_BRANCH || 'main',
   schemas: platformSchemas
 });
 
@@ -38,17 +40,41 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
+      initializeCollections: async () => {
+        try {
+          // Initialize all collections if they don't exist
+          const collections = Object.keys(platformSchemas);
+          
+          for (const collection of collections) {
+            try {
+              await sdk.get(collection);
+            } catch (error) {
+              // Collection doesn't exist, create it with empty array
+              console.log(`Creating collection: ${collection}`);
+              await sdk.save(collection, []);
+            }
+          }
+          
+          console.log('All collections initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize collections:', error);
+        }
+      },
+
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
         try {
+          // Initialize collections first
+          await get().initializeCollections();
+          
           // Demo login - replace with actual authentication
           if (email === 'student@demo.com' && password === 'password123') {
             const demoUser: User = {
               id: '1',
               uid: 'demo-student-1',
               email: 'student@demo.com',
-              firstName: 'Muslim',
-              lastName: 'Muslim',
+              firstName: 'John',
+              lastName: 'Doe',
               role: 'student',
               preferences: {
                 theme: 'light',
@@ -190,6 +216,9 @@ export const useAuthStore = create<AuthState>()(
       register: async (email: string, password: string, profile: Partial<User>) => {
         set({ isLoading: true, error: null });
         try {
+          // Initialize collections first
+          await get().initializeCollections();
+          
           const user = await sdk.register(email, password, {
             ...profile,
             createdAt: new Date().toISOString(),

@@ -20,6 +20,7 @@ export const platformSchemas: Record<string, SchemaDefinition> = {
       nationality: 'string',
       emergencyContact: 'object',
       academicInfo: 'object',
+      financialInfo: 'object',
       preferences: 'object',
       status: 'string',
       verified: 'boolean',
@@ -64,6 +65,7 @@ export const platformSchemas: Record<string, SchemaDefinition> = {
       maxStudents: 'number',
       currentEnrollment: 'number',
       prerequisites: 'array',
+      corequisites: 'array',
       learningObjectives: 'array',
       syllabus: 'array',
       schedule: 'array',
@@ -81,12 +83,15 @@ export const platformSchemas: Record<string, SchemaDefinition> = {
       startDate: 'date',
       endDate: 'date',
       enrollmentDeadline: 'date',
+      forumId: 'string',
+      studyGroupId: 'string',
       createdAt: 'date',
       updatedAt: 'date'
     },
     defaults: {
       currentEnrollment: 0,
       prerequisites: [],
+      corequisites: [],
       learningObjectives: [],
       syllabus: [],
       schedule: [],
@@ -128,6 +133,7 @@ export const platformSchemas: Record<string, SchemaDefinition> = {
       difficulty: 'string',
       isPreview: 'boolean',
       published: 'boolean',
+      interactiveElements: 'array',
       createdAt: 'date',
       updatedAt: 'date'
     },
@@ -142,8 +148,380 @@ export const platformSchemas: Record<string, SchemaDefinition> = {
       difficulty: 'easy',
       isPreview: false,
       published: false,
+      interactiveElements: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
+    }
+  },
+
+  enrollments: {
+    required: ['studentId', 'courseId'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      courseId: 'string',
+      enrolledAt: 'date',
+      status: 'string',
+      progress: 'number',
+      grade: 'number',
+      letterGrade: 'string',
+      completedLessons: 'array',
+      completedAssignments: 'array',
+      completedQuizzes: 'array',
+      lastAccessedAt: 'date',
+      certificateIssued: 'boolean',
+      certificateUrl: 'string',
+      withdrawalReason: 'string',
+      withdrawalDate: 'date',
+      refundAmount: 'number',
+      refundStatus: 'string'
+    },
+    defaults: {
+      status: 'active',
+      progress: 0,
+      completedLessons: [],
+      completedAssignments: [],
+      completedQuizzes: [],
+      certificateIssued: false,
+      enrolledAt: new Date().toISOString(),
+      lastAccessedAt: new Date().toISOString()
+    }
+  },
+
+  transcripts: {
+    required: ['studentId', 'academicYear'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      academicYear: 'string',
+      semester: 'string',
+      courses: 'array',
+      gpa: 'number',
+      cumulativeGPA: 'number',
+      totalCredits: 'number',
+      cumulativeCredits: 'number',
+      academicStanding: 'string',
+      honors: 'array',
+      degreeProgress: 'object',
+      isOfficial: 'boolean',
+      issuedAt: 'date',
+      issuedBy: 'string',
+      verificationCode: 'string'
+    },
+    defaults: {
+      gpa: 0,
+      cumulativeGPA: 0,
+      totalCredits: 0,
+      cumulativeCredits: 0,
+      academicStanding: 'good',
+      honors: [],
+      isOfficial: false,
+      verificationCode: crypto.randomUUID(),
+      issuedAt: new Date().toISOString()
+    }
+  },
+
+  degreePlans: {
+    required: ['studentId', 'degreeType', 'major'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      degreeType: 'string',
+      major: 'string',
+      minor: 'string',
+      concentration: 'string',
+      requiredCourses: 'array',
+      electiveCourses: 'array',
+      completedCourses: 'array',
+      plannedCourses: 'array',
+      totalCreditsRequired: 'number',
+      creditsCompleted: 'number',
+      expectedGraduation: 'date',
+      advisorId: 'string',
+      status: 'string',
+      lastUpdated: 'date'
+    },
+    defaults: {
+      requiredCourses: [],
+      electiveCourses: [],
+      completedCourses: [],
+      plannedCourses: [],
+      totalCreditsRequired: 120,
+      creditsCompleted: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString()
+    }
+  },
+
+  creditTransfers: {
+    required: ['studentId', 'fromInstitution', 'courseName'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      fromInstitution: 'string',
+      courseName: 'string',
+      courseCode: 'string',
+      credits: 'number',
+      grade: 'string',
+      equivalentCourseId: 'string',
+      equivalentCourseName: 'string',
+      status: 'string',
+      evaluatedBy: 'string',
+      evaluatedAt: 'date',
+      documents: 'array',
+      notes: 'string'
+    },
+    defaults: {
+      status: 'pending',
+      documents: [],
+      evaluatedAt: new Date().toISOString()
+    }
+  },
+
+  tuitionRecords: {
+    required: ['studentId', 'academicYear', 'semester'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      academicYear: 'string',
+      semester: 'string',
+      tuitionAmount: 'number',
+      fees: 'array',
+      totalAmount: 'number',
+      paidAmount: 'number',
+      balance: 'number',
+      dueDate: 'date',
+      status: 'string',
+      paymentPlan: 'object',
+      transactions: 'array'
+    },
+    defaults: {
+      tuitionAmount: 0,
+      fees: [],
+      totalAmount: 0,
+      paidAmount: 0,
+      balance: 0,
+      status: 'pending',
+      transactions: []
+    }
+  },
+
+  financialAid: {
+    required: ['studentId', 'aidType', 'amount'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      aidType: 'string',
+      amount: 'number',
+      source: 'string',
+      academicYear: 'string',
+      semester: 'string',
+      status: 'string',
+      requirements: 'array',
+      disbursements: 'array',
+      conditions: 'array',
+      renewalCriteria: 'object',
+      applicationDate: 'date',
+      awardDate: 'date'
+    },
+    defaults: {
+      status: 'pending',
+      requirements: [],
+      disbursements: [],
+      conditions: [],
+      applicationDate: new Date().toISOString()
+    }
+  },
+
+  payments: {
+    required: ['studentId', 'amount', 'type'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      studentId: 'string',
+      amount: 'number',
+      type: 'string',
+      method: 'string',
+      status: 'string',
+      transactionId: 'string',
+      reference: 'string',
+      description: 'string',
+      dueDate: 'date',
+      paidDate: 'date',
+      refundAmount: 'number',
+      refundDate: 'date',
+      metadata: 'object'
+    },
+    defaults: {
+      status: 'pending',
+      metadata: {},
+      paidDate: new Date().toISOString()
+    }
+  },
+
+  accreditationReports: {
+    required: ['reportType', 'academicYear'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      reportType: 'string',
+      academicYear: 'string',
+      data: 'object',
+      metrics: 'object',
+      compliance: 'object',
+      recommendations: 'array',
+      status: 'string',
+      submittedBy: 'string',
+      submittedAt: 'date',
+      reviewedBy: 'string',
+      reviewedAt: 'date'
+    },
+    defaults: {
+      data: {},
+      metrics: {},
+      compliance: {},
+      recommendations: [],
+      status: 'draft',
+      submittedAt: new Date().toISOString()
+    }
+  },
+
+  retentionAnalytics: {
+    required: ['cohort', 'academicYear'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      cohort: 'string',
+      academicYear: 'string',
+      totalStudents: 'number',
+      retainedStudents: 'number',
+      retentionRate: 'number',
+      dropoutReasons: 'array',
+      interventions: 'array',
+      riskFactors: 'array',
+      successFactors: 'array',
+      demographics: 'object',
+      calculatedAt: 'date'
+    },
+    defaults: {
+      totalStudents: 0,
+      retainedStudents: 0,
+      retentionRate: 0,
+      dropoutReasons: [],
+      interventions: [],
+      riskFactors: [],
+      successFactors: [],
+      demographics: {},
+      calculatedAt: new Date().toISOString()
+    }
+  },
+
+  facultyPerformance: {
+    required: ['facultyId', 'academicYear'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      facultyId: 'string',
+      academicYear: 'string',
+      teachingLoad: 'number',
+      studentEvaluations: 'object',
+      courseCompletionRates: 'object',
+      researchOutput: 'array',
+      serviceActivities: 'array',
+      professionalDevelopment: 'array',
+      overallRating: 'number',
+      goals: 'array',
+      achievements: 'array',
+      evaluatedBy: 'string',
+      evaluatedAt: 'date'
+    },
+    defaults: {
+      teachingLoad: 0,
+      studentEvaluations: {},
+      courseCompletionRates: {},
+      researchOutput: [],
+      serviceActivities: [],
+      professionalDevelopment: [],
+      overallRating: 0,
+      goals: [],
+      achievements: [],
+      evaluatedAt: new Date().toISOString()
+    }
+  },
+
+  resourceUtilization: {
+    required: ['resourceType', 'period'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      resourceType: 'string',
+      resourceId: 'string',
+      period: 'string',
+      utilizationRate: 'number',
+      capacity: 'number',
+      actualUsage: 'number',
+      peakUsage: 'number',
+      efficiency: 'number',
+      cost: 'number',
+      revenue: 'number',
+      roi: 'number',
+      recommendations: 'array',
+      calculatedAt: 'date'
+    },
+    defaults: {
+      utilizationRate: 0,
+      capacity: 0,
+      actualUsage: 0,
+      peakUsage: 0,
+      efficiency: 0,
+      cost: 0,
+      revenue: 0,
+      roi: 0,
+      recommendations: [],
+      calculatedAt: new Date().toISOString()
+    }
+  },
+
+  libraryResources: {
+    required: ['title', 'type', 'isbn'],
+    types: {
+      id: 'string',
+      uid: 'string',
+      title: 'string',
+      author: 'string',
+      type: 'string',
+      isbn: 'string',
+      publisher: 'string',
+      publicationDate: 'date',
+      category: 'string',
+      subjects: 'array',
+      description: 'string',
+      location: 'string',
+      status: 'string',
+      digitalUrl: 'string',
+      accessLevel: 'string',
+      checkoutHistory: 'array',
+      reservations: 'array',
+      reviews: 'array',
+      rating: 'number',
+      addedBy: 'string',
+      addedAt: 'date'
+    },
+    defaults: {
+      subjects: [],
+      status: 'available',
+      accessLevel: 'public',
+      checkoutHistory: [],
+      reservations: [],
+      reviews: [],
+      rating: 0,
+      addedAt: new Date().toISOString()
     }
   },
 
@@ -261,34 +639,30 @@ export const platformSchemas: Record<string, SchemaDefinition> = {
     }
   },
 
-  enrollments: {
-    required: ['studentId', 'courseId'],
+  quizAttempts: {
+    required: ['quizId', 'studentId'],
     types: {
       id: 'string',
       uid: 'string',
+      quizId: 'string',
       studentId: 'string',
-      courseId: 'string',
-      enrolledAt: 'date',
-      status: 'string',
-      progress: 'number',
-      grade: 'number',
-      letterGrade: 'string',
-      completedLessons: 'array',
-      completedAssignments: 'array',
-      completedQuizzes: 'array',
-      lastAccessedAt: 'date',
-      certificateIssued: 'boolean',
-      certificateUrl: 'string'
+      answers: 'array',
+      score: 'number',
+      maxScore: 'number',
+      percentage: 'number',
+      timeSpent: 'number',
+      startedAt: 'date',
+      completedAt: 'date',
+      status: 'string'
     },
     defaults: {
-      status: 'active',
-      progress: 0,
-      completedLessons: [],
-      completedAssignments: [],
-      completedQuizzes: [],
-      certificateIssued: false,
-      enrolledAt: new Date().toISOString(),
-      lastAccessedAt: new Date().toISOString()
+      answers: [],
+      score: 0,
+      maxScore: 0,
+      percentage: 0,
+      timeSpent: 0,
+      status: 'in_progress',
+      startedAt: new Date().toISOString()
     }
   },
 
