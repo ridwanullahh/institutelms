@@ -23,19 +23,29 @@ import Messages from './components/Messages/Messages';
 import Analytics from './components/Analytics/Analytics';
 import Certificates from './components/Certificates/Certificates';
 import StudyGroups from './components/StudyGroups/StudyGroups';
+import TranscriptManagement from './components/Academic/TranscriptManagement';
+import DegreePlanning from './components/Academic/DegreePlanning';
+import TuitionManagement from './components/Financial/TuitionManagement';
 
 function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, initializeCollections } = useAuthStore();
   const { currentView, theme, initializeAI } = usePlatformStore();
 
-  // Initialize AI service with your Chutes AI API key
+  // Initialize AI service with environment variable
   useEffect(() => {
-    const apiKey = 'your-chutes-ai-api-key'; // Replace with your actual API key
+    const apiKey = import.meta.env.VITE_CHUTES_AI_API_KEY;
     if (apiKey && apiKey !== 'your-chutes-ai-api-key') {
       initializeAI(apiKey);
     }
   }, [initializeAI]);
+
+  // Initialize collections on app start
+  useEffect(() => {
+    if (isAuthenticated) {
+      initializeCollections();
+    }
+  }, [isAuthenticated, initializeCollections]);
 
   // Apply theme to document
   useEffect(() => {
@@ -68,6 +78,7 @@ function App() {
       case 'dashboard':
         return <Dashboard />;
       case 'courses':
+      case 'course-management':
         return <CourseManagement />;
       case 'ai-tutor':
         return <AITutor />;
@@ -88,6 +99,7 @@ function App() {
         return <Calendar />;
       case 'analytics':
       case 'system-analytics':
+      case 'institutional-analytics':
         return <Analytics />;
       case 'messages':
         return <Messages />;
@@ -95,12 +107,64 @@ function App() {
         return <Certificates />;
       case 'study-groups':
         return <StudyGroups />;
+      case 'transcripts':
+        return <TranscriptManagement />;
+      case 'degree-planning':
+        return <DegreePlanning />;
+      case 'tuition':
+      case 'tuition-management':
+        return <TuitionManagement />;
       case 'course-builder':
         return (
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">AI Course Builder</h1>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
               <p className="text-gray-600 dark:text-gray-400">AI-powered course creation tools coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'library':
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Digital Library</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">Digital library system coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'financial-aid':
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Financial Aid</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">Financial aid management coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'enrollment-management':
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Enrollment Management</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">Enrollment management system coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'academic-administration':
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Academic Administration</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">Academic administration tools coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'financial-management':
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Financial Management</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">Financial management system coming soon...</p>
             </div>
           </div>
         );
