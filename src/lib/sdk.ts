@@ -174,7 +174,7 @@ class UniversalSDK {
   }
 
   // 1.5 save
-  private async save<T = any>(collection: string, data: T[]): Promise<void> {
+  async save<T = any>(collection: string, data: T[]): Promise<void> {
     let sha: string | undefined;
     try {
       const head = await this.request(`${this.basePath}/${collection}.json`);
@@ -303,9 +303,6 @@ class UniversalSDK {
     items.forEach(item => this.validateSchema(collection, item));
   }
 
-  // Remaining methods follow the same pattern...
-  // For brevity, I'm including key methods. The full implementation would continue here.
-
   // 🔐 3. AUTHENTICATION
 
   // 3.1 hashPassword
@@ -357,6 +354,11 @@ class UniversalSDK {
     return session?.user || null;
   }
 
+  // 4.4 destroySession
+  destroySession(token: string): void {
+    delete this.sessionStore[token];
+  }
+
   // 2.4 validateEmailFormat
   validateEmailFormat(email: string): boolean {
     return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
@@ -396,6 +398,46 @@ class UniversalSDK {
       exec() { return chain; },
     };
     return qb;
+  }
+
+  // Password reset functionality
+  async requestPasswordReset(email: string): Promise<void> {
+    const users = await this.get<User>("users");
+    const user = users.find(u => u.email === email);
+    if (!user) throw new Error("User not found");
+    
+    // In a real implementation, this would send an email
+    const otp = Math.random().toString(36).substring(2, 8).toUpperCase();
+    this.otpMemory[email] = {
+      otp,
+      created: Date.now(),
+      reason: 'password_reset'
+    };
+    
+    console.log(`Password reset OTP for ${email}: ${otp}`);
+  }
+
+  async resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
+    const otpRecord = this.otpMemory[email];
+    if (!otpRecord || otpRecord.otp !== otp) {
+      throw new Error("Invalid OTP");
+    }
+    
+    // Check if OTP is expired (10 minutes)
+    if (Date.now() - otpRecord.created > 10 * 60 * 1000) {
+      delete this.otpMemory[email];
+      throw new Error("OTP expired");
+    }
+    
+    const users = await this.get<User>("users");
+    const userIndex = users.findIndex(u => u.email === email);
+    if (userIndex === -1) throw new Error("User not found");
+    
+    const hashedPassword = this.hashPassword(newPassword);
+    users[userIndex].password = hashedPassword;
+    
+    await this.save("users", users);
+    delete this.otpMemory[email];
   }
 }
 
