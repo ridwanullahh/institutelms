@@ -13,7 +13,7 @@ import {
   CheckCircle,
   AlertCircle,
   Eye,
-  Print,
+  Printer,
   Share2,
   Verified,
   GraduationCap,
@@ -358,7 +358,7 @@ const TranscriptManagement: React.FC = () => {
               </button>
               
               <button className="flex items-center space-x-2 px-4 py-2 text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
-                <Print className="w-4 h-4" />
+                <Printer className="w-4 h-4" />
                 <span>Print</span>
               </button>
               
@@ -589,7 +589,7 @@ const TranscriptManagement: React.FC = () => {
                           className="text-purple-600 hover:text-purple-900"
                           title="Print"
                         >
-                          <Print className="w-4 h-4" />
+                          <Printer className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
