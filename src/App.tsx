@@ -26,6 +26,11 @@ import StudyGroups from './components/StudyGroups/StudyGroups';
 import TranscriptManagement from './components/Academic/TranscriptManagement';
 import DegreePlanning from './components/Academic/DegreePlanning';
 import TuitionManagement from './components/Financial/TuitionManagement';
+import AICourseBuilder from './components/Courses/AICourseBuilder';
+import DigitalLibrary from './components/Library/DigitalLibrary';
+import FinancialAidManagement from './components/Financial/FinancialAidManagement';
+import EnrollmentManagement from './components/Academic/EnrollmentManagement';
+import AcademicAdministration from './components/Academic/AcademicAdministration';
 
 function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -120,59 +125,17 @@ function App() {
       case 'tuition-management':
         return <TuitionManagement />;
       case 'course-builder':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">AI Course Builder</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">AI-powered course creation tools coming soon...</p>
-            </div>
-          </div>
-        );
+        return <AICourseBuilder />;
       case 'library':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Digital Library</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">Digital library system coming soon...</p>
-            </div>
-          </div>
-        );
+        return <DigitalLibrary />;
       case 'financial-aid':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Financial Aid</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">Financial aid management coming soon...</p>
-            </div>
-          </div>
-        );
+        return <FinancialAidManagement />;
       case 'enrollment-management':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Enrollment Management</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">Enrollment management system coming soon...</p>
-            </div>
-          </div>
-        );
+        return <EnrollmentManagement />;
       case 'academic-administration':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Academic Administration</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">Academic administration tools coming soon...</p>
-            </div>
-          </div>
-        );
+        return <AcademicAdministration />;
       case 'financial-management':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Financial Management</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">Financial management system coming soon...</p>
-            </div>
-          </div>
-        );
+        return <FinancialAidManagement />;
       default:
         return <Dashboard />;
     }
