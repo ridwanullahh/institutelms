@@ -178,27 +178,36 @@ interface PlatformState {
   // Academic Administration
   createTranscript: (transcriptData: any) => Promise<any>;
   updateTranscript: (transcriptId: string, updates: any) => Promise<any>;
+  deleteTranscript: (transcriptId: string) => Promise<void>;
   createDegreePlan: (planData: any) => Promise<any>;
   updateDegreePlan: (planId: string, updates: any) => Promise<any>;
+  deleteDegreePlan: (planId: string) => Promise<void>;
   createCreditTransfer: (transferData: any) => Promise<any>;
   updateCreditTransfer: (transferId: string, updates: any) => Promise<any>;
-  
+  deleteCreditTransfer: (transferId: string) => Promise<void>;
+
   // Financial Management
   createTuitionRecord: (recordData: any) => Promise<any>;
   updateTuitionRecord: (recordId: string, updates: any) => Promise<any>;
+  deleteTuitionRecord: (recordId: string) => Promise<void>;
   createFinancialAid: (aidData: any) => Promise<any>;
   updateFinancialAid: (aidId: string, updates: any) => Promise<any>;
+  deleteFinancialAid: (aidId: string) => Promise<void>;
   processPayment: (paymentData: any) => Promise<any>;
   
   // Institutional Analytics
   createAccreditationReport: (reportData: any) => Promise<any>;
   updateAccreditationReport: (reportId: string, updates: any) => Promise<any>;
+  deleteAccreditationReport: (reportId: string) => Promise<void>;
   createRetentionAnalytics: (analyticsData: any) => Promise<any>;
   updateRetentionAnalytics: (analyticsId: string, updates: any) => Promise<any>;
+  deleteRetentionAnalytics: (analyticsId: string) => Promise<void>;
   createFacultyPerformance: (performanceData: any) => Promise<any>;
   updateFacultyPerformance: (performanceId: string, updates: any) => Promise<any>;
+  deleteFacultyPerformance: (performanceId: string) => Promise<void>;
   createResourceUtilization: (utilizationData: any) => Promise<any>;
   updateResourceUtilization: (utilizationId: string, updates: any) => Promise<any>;
+  deleteResourceUtilization: (utilizationId: string) => Promise<void>;
   
   // Library System
   createLibraryResource: (resourceData: any) => Promise<any>;
@@ -1052,12 +1061,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateTranscript: async (transcriptId: string, updates: any) => {
     const transcript = await sdk.update('transcripts', transcriptId, updates);
-    
+
     const { transcripts } = get();
-    set({ 
+    set({
       transcripts: transcripts.map(t => t.id === transcriptId ? transcript : t)
     });
     return transcript;
+  },
+
+  deleteTranscript: async (transcriptId: string) => {
+    await sdk.delete('transcripts', transcriptId);
+    const { transcripts } = get();
+    set({ transcripts: transcripts.filter(t => t.id !== transcriptId) });
   },
 
   createDegreePlan: async (planData: any) => {
@@ -1065,7 +1080,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...planData,
       lastUpdated: new Date().toISOString()
     });
-    
+
     const { degreePlans } = get();
     set({ degreePlans: [...degreePlans, plan] });
     return plan;
@@ -1076,12 +1091,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...updates,
       lastUpdated: new Date().toISOString()
     });
-    
+
     const { degreePlans } = get();
-    set({ 
+    set({
       degreePlans: degreePlans.map(p => p.id === planId ? plan : p)
     });
     return plan;
+  },
+
+  deleteDegreePlan: async (planId: string) => {
+    await sdk.delete('degreePlans', planId);
+    const { degreePlans } = get();
+    set({ degreePlans: degreePlans.filter(p => p.id !== planId) });
   },
 
   createCreditTransfer: async (transferData: any) => {
@@ -1089,7 +1110,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...transferData,
       evaluatedAt: new Date().toISOString()
     });
-    
+
     const { creditTransfers } = get();
     set({ creditTransfers: [...creditTransfers, transfer] });
     return transfer;
@@ -1100,18 +1121,24 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...updates,
       evaluatedAt: new Date().toISOString()
     });
-    
+
     const { creditTransfers } = get();
-    set({ 
+    set({
       creditTransfers: creditTransfers.map(t => t.id === transferId ? transfer : t)
     });
     return transfer;
   },
 
+  deleteCreditTransfer: async (transferId: string) => {
+    await sdk.delete('creditTransfers', transferId);
+    const { creditTransfers } = get();
+    set({ creditTransfers: creditTransfers.filter(t => t.id !== transferId) });
+  },
+
   // Financial Management
   createTuitionRecord: async (recordData: any) => {
     const record = await sdk.insert('tuitionRecords', recordData);
-    
+
     const { tuitionRecords } = get();
     set({ tuitionRecords: [...tuitionRecords, record] });
     return record;
@@ -1119,12 +1146,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateTuitionRecord: async (recordId: string, updates: any) => {
     const record = await sdk.update('tuitionRecords', recordId, updates);
-    
+
     const { tuitionRecords } = get();
-    set({ 
+    set({
       tuitionRecords: tuitionRecords.map(r => r.id === recordId ? record : r)
     });
     return record;
+  },
+
+  deleteTuitionRecord: async (recordId: string) => {
+    await sdk.delete('tuitionRecords', recordId);
+    const { tuitionRecords } = get();
+    set({ tuitionRecords: tuitionRecords.filter(r => r.id !== recordId) });
   },
 
   createFinancialAid: async (aidData: any) => {
@@ -1132,7 +1165,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...aidData,
       applicationDate: new Date().toISOString()
     });
-    
+
     const { financialAid } = get();
     set({ financialAid: [...financialAid, aid] });
     return aid;
@@ -1140,12 +1173,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateFinancialAid: async (aidId: string, updates: any) => {
     const aid = await sdk.update('financialAid', aidId, updates);
-    
+
     const { financialAid } = get();
-    set({ 
+    set({
       financialAid: financialAid.map(a => a.id === aidId ? aid : a)
     });
     return aid;
+  },
+
+  deleteFinancialAid: async (aidId: string) => {
+    await sdk.delete('financialAid', aidId);
+    const { financialAid } = get();
+    set({ financialAid: financialAid.filter(a => a.id !== aidId) });
   },
 
   processPayment: async (paymentData: any) => {
@@ -1153,7 +1192,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...paymentData,
       paidDate: new Date().toISOString()
     });
-    
+
     const { payments } = get();
     set({ payments: [...payments, payment] });
     return payment;
@@ -1173,12 +1212,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateAccreditationReport: async (reportId: string, updates: any) => {
     const report = await sdk.update('accreditationReports', reportId, updates);
-    
+
     const { accreditationReports } = get();
-    set({ 
+    set({
       accreditationReports: accreditationReports.map(r => r.id === reportId ? report : r)
     });
     return report;
+  },
+
+  deleteAccreditationReport: async (reportId: string) => {
+    await sdk.delete('accreditationReports', reportId);
+    const { accreditationReports } = get();
+    set({ accreditationReports: accreditationReports.filter(r => r.id !== reportId) });
   },
 
   createRetentionAnalytics: async (analyticsData: any) => {
@@ -1186,7 +1231,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...analyticsData,
       calculatedAt: new Date().toISOString()
     });
-    
+
     const { retentionAnalytics } = get();
     set({ retentionAnalytics: [...retentionAnalytics, analytics] });
     return analytics;
@@ -1194,12 +1239,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateRetentionAnalytics: async (analyticsId: string, updates: any) => {
     const analytics = await sdk.update('retentionAnalytics', analyticsId, updates);
-    
+
     const { retentionAnalytics } = get();
-    set({ 
+    set({
       retentionAnalytics: retentionAnalytics.map(a => a.id === analyticsId ? analytics : a)
     });
     return analytics;
+  },
+
+  deleteRetentionAnalytics: async (analyticsId: string) => {
+    await sdk.delete('retentionAnalytics', analyticsId);
+    const { retentionAnalytics } = get();
+    set({ retentionAnalytics: retentionAnalytics.filter(a => a.id !== analyticsId) });
   },
 
   createFacultyPerformance: async (performanceData: any) => {
@@ -1207,7 +1258,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...performanceData,
       evaluatedAt: new Date().toISOString()
     });
-    
+
     const { facultyPerformance } = get();
     set({ facultyPerformance: [...facultyPerformance, performance] });
     return performance;
@@ -1215,12 +1266,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateFacultyPerformance: async (performanceId: string, updates: any) => {
     const performance = await sdk.update('facultyPerformance', performanceId, updates);
-    
+
     const { facultyPerformance } = get();
-    set({ 
+    set({
       facultyPerformance: facultyPerformance.map(p => p.id === performanceId ? performance : p)
     });
     return performance;
+  },
+
+  deleteFacultyPerformance: async (performanceId: string) => {
+    await sdk.delete('facultyPerformance', performanceId);
+    const { facultyPerformance } = get();
+    set({ facultyPerformance: facultyPerformance.filter(p => p.id !== performanceId) });
   },
 
   createResourceUtilization: async (utilizationData: any) => {
@@ -1228,7 +1285,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...utilizationData,
       calculatedAt: new Date().toISOString()
     });
-    
+
     const { resourceUtilization } = get();
     set({ resourceUtilization: [...resourceUtilization, utilization] });
     return utilization;
@@ -1236,12 +1293,18 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
 
   updateResourceUtilization: async (utilizationId: string, updates: any) => {
     const utilization = await sdk.update('resourceUtilization', utilizationId, updates);
-    
+
     const { resourceUtilization } = get();
-    set({ 
+    set({
       resourceUtilization: resourceUtilization.map(u => u.id === utilizationId ? utilization : u)
     });
     return utilization;
+  },
+
+  deleteResourceUtilization: async (utilizationId: string) => {
+    await sdk.delete('resourceUtilization', utilizationId);
+    const { resourceUtilization } = get();
+    set({ resourceUtilization: resourceUtilization.filter(u => u.id !== utilizationId) });
   },
 
   // Library System
@@ -1250,7 +1313,7 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
       ...resourceData,
       addedAt: new Date().toISOString()
     });
-    
+
     const { libraryResources } = get();
     set({ libraryResources: [...libraryResources, resource] });
     return resource;
