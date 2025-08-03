@@ -20,6 +20,7 @@ interface AuthState {
   requestPasswordReset: (email: string) => Promise<void>;
   resetPassword: (email: string, otp: string, newPassword: string) => Promise<void>;
   initializeCollections: () => Promise<void>;
+  initializeApp: () => Promise<void>;
 }
 
 // Initialize SDK with environment variables
@@ -349,6 +350,16 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false
           });
           throw error;
+        }
+      },
+
+      initializeApp: async () => {
+        try {
+          // Initialize all collections when the app starts
+          await get().initializeCollections();
+          console.log('App initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize app:', error);
         }
       }
     }),

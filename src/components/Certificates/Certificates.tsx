@@ -31,10 +31,14 @@ import toast from 'react-hot-toast';
 
 const Certificates: React.FC = () => {
   const { user } = useAuthStore();
-  const { 
-    certificates, 
+  const {
+    certificates,
     courses,
-    loadCertificates 
+    loadCertificates,
+    loadCourses,
+    createCertificate,
+    updateCertificate,
+    deleteCertificate
   } = usePlatformStore();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +48,7 @@ const Certificates: React.FC = () => {
 
   useEffect(() => {
     loadCertificates();
+    loadCourses();
   }, []);
 
   const filteredCertificates = certificates.filter(cert => {

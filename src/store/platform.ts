@@ -204,6 +204,23 @@ interface PlatformState {
   createLibraryResource: (resourceData: any) => Promise<any>;
   updateLibraryResource: (resourceId: string, updates: any) => Promise<any>;
   deleteLibraryResource: (resourceId: string) => Promise<void>;
+
+  // Certificate management
+  createCertificate: (certificateData: Partial<Certificate>) => Promise<Certificate>;
+  updateCertificate: (certificateId: string, updates: Partial<Certificate>) => Promise<Certificate>;
+  deleteCertificate: (certificateId: string) => Promise<void>;
+
+  // Study group management
+  createStudyGroup: (groupData: Partial<StudyGroup>) => Promise<StudyGroup>;
+  updateStudyGroup: (groupId: string, updates: Partial<StudyGroup>) => Promise<StudyGroup>;
+  deleteStudyGroup: (groupId: string) => Promise<void>;
+  joinStudyGroup: (groupId: string, userId: string) => Promise<void>;
+  leaveStudyGroup: (groupId: string, userId: string) => Promise<void>;
+
+  // AI Tutor session management
+  createAITutorSession: (sessionData: Partial<AITutorSession>) => Promise<AITutorSession>;
+  updateAITutorSession: (sessionId: string, updates: Partial<AITutorSession>) => Promise<AITutorSession>;
+  deleteAITutorSession: (sessionId: string) => Promise<void>;
 }
 
 export const usePlatformStore = create<PlatformState>((set, get) => ({
@@ -1253,5 +1270,140 @@ export const usePlatformStore = create<PlatformState>((set, get) => ({
     await sdk.delete('libraryResources', resourceId);
     const { libraryResources } = get();
     set({ libraryResources: libraryResources.filter(r => r.id !== resourceId) });
+  },
+
+  // Certificate management
+  createCertificate: async (certificateData: Partial<Certificate>) => {
+    const certificate = await sdk.insert<Certificate>('certificates', {
+      ...certificateData,
+      verificationCode: crypto.randomUUID(),
+      issuedAt: new Date().toISOString()
+    });
+
+    const { certificates } = get();
+    set({ certificates: [...certificates, certificate] });
+    return certificate;
+  },
+
+  updateCertificate: async (certificateId: string, updates: Partial<Certificate>) => {
+    const certificate = await sdk.update<Certificate>('certificates', certificateId, updates);
+
+    const { certificates } = get();
+    set({
+      certificates: certificates.map(c => c.id === certificateId ? certificate : c)
+    });
+    return certificate;
+  },
+
+  deleteCertificate: async (certificateId: string) => {
+    await sdk.delete('certificates', certificateId);
+    const { certificates } = get();
+    set({ certificates: certificates.filter(c => c.id !== certificateId) });
+  },
+
+  // Study group management
+  createStudyGroup: async (groupData: Partial<StudyGroup>) => {
+    const studyGroup = await sdk.insert<StudyGroup>('studyGroups', {
+      ...groupData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const { studyGroups } = get();
+    set({ studyGroups: [...studyGroups, studyGroup] });
+    return studyGroup;
+  },
+
+  updateStudyGroup: async (groupId: string, updates: Partial<StudyGroup>) => {
+    const studyGroup = await sdk.update<StudyGroup>('studyGroups', groupId, {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    });
+
+    const { studyGroups } = get();
+    set({
+      studyGroups: studyGroups.map(g => g.id === groupId ? studyGroup : g)
+    });
+    return studyGroup;
+  },
+
+  deleteStudyGroup: async (groupId: string) => {
+    await sdk.delete('studyGroups', groupId);
+    const { studyGroups } = get();
+    set({ studyGroups: studyGroups.filter(g => g.id !== groupId) });
+  },
+
+  joinStudyGroup: async (groupId: string, userId: string) => {
+    const { studyGroups, users } = get();
+    const group = studyGroups.find(g => g.id === groupId);
+    const user = users.find(u => u.id === userId);
+
+    if (group && user) {
+      const newMember = {
+        userId: user.id,
+        userName: `${user.firstName} ${user.lastName}`,
+        role: 'member' as const,
+        joinedAt: new Date().toISOString()
+      };
+
+      const updatedMembers = [...(group.members || []), newMember];
+      await sdk.update('studyGroups', groupId, {
+        members: updatedMembers,
+        updatedAt: new Date().toISOString()
+      });
+
+      set({
+        studyGroups: studyGroups.map(g =>
+          g.id === groupId ? { ...g, members: updatedMembers } : g
+        )
+      });
+    }
+  },
+
+  leaveStudyGroup: async (groupId: string, userId: string) => {
+    const { studyGroups } = get();
+    const group = studyGroups.find(g => g.id === groupId);
+
+    if (group) {
+      const updatedMembers = (group.members || []).filter(m => m.userId !== userId);
+      await sdk.update('studyGroups', groupId, {
+        members: updatedMembers,
+        updatedAt: new Date().toISOString()
+      });
+
+      set({
+        studyGroups: studyGroups.map(g =>
+          g.id === groupId ? { ...g, members: updatedMembers } : g
+        )
+      });
+    }
+  },
+
+  // AI Tutor session management
+  createAITutorSession: async (sessionData: Partial<AITutorSession>) => {
+    const aiTutorSession = await sdk.insert<AITutorSession>('aiTutorSessions', {
+      ...sessionData,
+      startedAt: new Date().toISOString()
+    });
+
+    const { aiTutorSessions } = get();
+    set({ aiTutorSessions: [...aiTutorSessions, aiTutorSession] });
+    return aiTutorSession;
+  },
+
+  updateAITutorSession: async (sessionId: string, updates: Partial<AITutorSession>) => {
+    const aiTutorSession = await sdk.update<AITutorSession>('aiTutorSessions', sessionId, updates);
+
+    const { aiTutorSessions } = get();
+    set({
+      aiTutorSessions: aiTutorSessions.map(s => s.id === sessionId ? aiTutorSession : s)
+    });
+    return aiTutorSession;
+  },
+
+  deleteAITutorSession: async (sessionId: string) => {
+    await sdk.delete('aiTutorSessions', sessionId);
+    const { aiTutorSessions } = get();
+    set({ aiTutorSessions: aiTutorSessions.filter(s => s.id !== sessionId) });
   }
 }));

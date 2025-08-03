@@ -29,7 +29,7 @@ import TuitionManagement from './components/Financial/TuitionManagement';
 
 function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const { isAuthenticated, user, initializeCollections } = useAuthStore();
+  const { isAuthenticated, user, initializeCollections, initializeApp } = useAuthStore();
   const { currentView, theme, initializeAI } = usePlatformStore();
 
   // Initialize AI service with environment variable
@@ -40,7 +40,12 @@ function App() {
     }
   }, [initializeAI]);
 
-  // Initialize collections on app start
+  // Initialize app and collections on startup
+  useEffect(() => {
+    initializeApp();
+  }, [initializeApp]);
+
+  // Initialize collections when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       initializeCollections();

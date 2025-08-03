@@ -36,10 +36,16 @@ import toast from 'react-hot-toast';
 
 const StudyGroups: React.FC = () => {
   const { user } = useAuthStore();
-  const { 
-    studyGroups, 
+  const {
+    studyGroups,
     courses,
-    loadStudyGroups 
+    loadStudyGroups,
+    loadCourses,
+    createStudyGroup,
+    updateStudyGroup,
+    deleteStudyGroup,
+    joinStudyGroup,
+    leaveStudyGroup
   } = usePlatformStore();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,6 +57,7 @@ const StudyGroups: React.FC = () => {
 
   useEffect(() => {
     loadStudyGroups();
+    loadCourses();
   }, []);
 
   const filteredGroups = studyGroups.filter(group => {
@@ -69,7 +76,16 @@ const StudyGroups: React.FC = () => {
 
   const handleCreateGroup = async (groupData: Partial<StudyGroup>) => {
     try {
-      // Implementation would create the study group
+      await createStudyGroup({
+        ...groupData,
+        creatorId: user?.id!,
+        members: [{
+          userId: user?.id!,
+          userName: `${user?.firstName} ${user?.lastName}`,
+          role: 'creator',
+          joinedAt: new Date().toISOString()
+        }]
+      });
       setShowCreateModal(false);
       toast.success('Study group created successfully');
     } catch (error) {
@@ -79,9 +95,9 @@ const StudyGroups: React.FC = () => {
 
   const handleJoinGroup = async (groupId: string) => {
     if (!user) return;
-    
+
     try {
-      // Implementation would add user to group
+      await joinStudyGroup(groupId, user.id!);
       toast.success('Joined study group successfully');
     } catch (error) {
       toast.error('Failed to join study group');
@@ -90,9 +106,9 @@ const StudyGroups: React.FC = () => {
 
   const handleLeaveGroup = async (groupId: string) => {
     if (!user) return;
-    
+
     try {
-      // Implementation would remove user from group
+      await leaveStudyGroup(groupId, user.id!);
       toast.success('Left study group successfully');
     } catch (error) {
       toast.error('Failed to leave study group');
